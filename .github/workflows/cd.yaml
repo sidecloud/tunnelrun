@@ -40,9 +40,4 @@ jobs:
           install: true
 
       - name: Build and push images
-        uses: docker/bake-action@v6
-        env:
-          TAG: latest
-        with:
-          push: true
-          source: "{{defaultContext}}:docker"
+        run: docker builx bake --print
