@@ -14,7 +14,7 @@ services:
         - type=gha,mode=max
       x-bake:
         platforms:
-          - linux/arm64
+#          - linux/arm64
           - linux/amd64
     environment:
       TUNNEL_TOKEN:
