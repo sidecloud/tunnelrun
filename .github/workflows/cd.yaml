@@ -37,4 +37,4 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push images
-        run: docker buildx bake --print
+        run: docker buildx bake --push
