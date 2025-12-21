@@ -1,0 +1,24 @@
+services:
+  ollama:
+    image: sidecloud/tunnelrun:ollama
+    scale: 1
+    build:
+      context: ollama
+      target: ollama
+      tags:
+        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-ollama}
+        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-latest}
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+      x-bake:
+        platforms:
+          - linux/arm64
+          - linux/amd64
+    environment:
+      TUNNEL_TOKEN:
+    volumes:
+      - ./ollama/supervisord.conf:/etc/supervisor/supervisord.conf
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
