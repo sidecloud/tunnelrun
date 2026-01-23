@@ -7,7 +7,7 @@ FROM busybox AS downloader
 WORKDIR /usr/src/
 ARG TARGETPLATFORM
 RUN export ARCH=$(echo $TARGETPLATFORM | cut -d "/" -f2) && \
-    wget https://github.com/cloudflare/cloudflared/releases/download/2025.11.1/cloudflared-linux-$ARCH -O cloudflared
+    wget https://github.com/cloudflare/cloudflared/releases/download/2026.1.1/cloudflared-linux-$ARCH -O cloudflared
 RUN chmod +x cloudflared
 
 # Ollama target
