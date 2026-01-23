@@ -17,7 +17,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=downloader /usr/src/cloudflared /usr/local/bin/cloudflared
 RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
 RUN uv tool install supervisor
-COPY ollama_supervisord.conf /etc/supervisor/conf.d/ollama.conf
+COPY ollama_supervisord.conf /etc/supervisor/supervisord.conf
 VOLUME /home/ollama/.ollama
 ENTRYPOINT ["/usr/local/bin/supervisord"]
 CMD ["-c", "/etc/supervisor/supervisord.conf"]
@@ -29,7 +29,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=downloader /usr/src/cloudflared /usr/local/bin/cloudflared
 RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
 RUN uv tool install supervisor
-COPY llama_server_supervisord.conf /etc/supervisor/conf.d/llama-server.conf
+COPY llama_server_supervisord.conf /etc/supervisor/supervisord.conf
 VOLUME /root/.cache/llama.cpp
 ENTRYPOINT ["/usr/local/bin/supervisord"]
 CMD ["-c", "/etc/supervisor/supervisord.conf"]
