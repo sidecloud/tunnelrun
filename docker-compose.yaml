@@ -5,9 +5,12 @@ services:
     build:
       context: deploy
       target: ollama
+      args:
+        OLLAMA_TAG: ${OLLAMA_TAG:-0.14.3}
       tags:
-        - sidecloud8808/tunnelrun:ollama-${OLLAMA_TAG:-latest}
+        - sidecloud8808/tunnelrun:ollama-${OLLAMA_TAG:-0.14.3}
         - sidecloud8808/tunnelrun:ollama
+        - sidecloud8808/tunnelrun:latest
       cache_from:
         - type=gha,mode=max
       cache_to:
@@ -25,8 +28,10 @@ services:
     build:
       context: deploy
       target: llama-server
+      args:
+        LLAMA_SERVER_TAG: ${LLAMA_SERVER_TAG:-b7786}
       tags:
-        - sidecloud8808/tunnelrun:llama-server-${LLAMA_SERVER_TAG:-latest}
+        - sidecloud8808/tunnelrun:llama-server-cuda-${LLAMA_SERVER_TAG:-b7786}
         - sidecloud8808/tunnelrun:llama-server
       cache_from:
         - type=gha,mode=max
