@@ -1,3 +1,7 @@
+x-build_args: &build_args
+  OLLAMA_TAG: ${OLLAMA_TAG:-0.14.3}
+  LLAMA_SERVER_TAG: ${LLAMA_SERVER_TAG:-b7786}
+
 services:
   ollama:
     image: sidecloud/tunnelrun:ollama
@@ -6,7 +10,7 @@ services:
       context: deploy
       target: ollama
       args:
-        OLLAMA_TAG: ${OLLAMA_TAG:-0.14.3}
+        <<: *build_args
       tags:
         - sidecloud8808/tunnelrun:ollama-${OLLAMA_TAG:-0.14.3}
         - sidecloud8808/tunnelrun:ollama
@@ -29,7 +33,7 @@ services:
       context: deploy
       target: llama-server
       args:
-        LLAMA_SERVER_TAG: ${LLAMA_SERVER_TAG:-b7786}
+        <<: *build_args
       tags:
         - sidecloud8808/tunnelrun:llama-server-cuda-${LLAMA_SERVER_TAG:-b7786}
         - sidecloud8808/tunnelrun:llama-server
