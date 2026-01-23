@@ -1,18 +1,27 @@
 # Tunnelrun
 
-A Docker-based solution for running LLM serving platforms with Cloudflare Tunnel integration. This project provides secure internet access to LLM serving solutions through Cloudflare's tunneling service.
+This solutions allows you to run a container that automatically binds to a CloudFlareTunnel, leveraging Zero Trust Access and making the access to your LLMs secure.
+
+The current LLM solutions supported are:
+
+* Ollama;
+* LLama-Server.
 
 ## Features
 
-- **Ollama Integration**: Runs Ollama 0.13.5 for serving large language models
+- **Ollama Integration**: Runs Ollama for serving large language models
+- **Llama-server Support**: Integrated support for llama-server as an LLM backend
 - **Cloudflare Tunnel**: Securely exposes LLM services to the internet without opening ports
-- **Multi-platform Support**: Builds for both ARM64 and AMD64 architectures
 - **Supervisor Management**: Uses supervisord to manage LLM and Cloudflare Tunnel processes
-- **Future Backend Support**: Planned support for vLLM and llama.cpp backends
 
 ## Prerequisites
 
+To be able to fully test this repository, you'll need to have the following tools installed:
+
 - Docker and Docker Compose installed
+
+Additionally,since the CloudFlare tunnel integration you also need:
+
 - Cloudflare account with tunnel configured.
 - Cloudflare Tunnel token (TUNNEL_TOKEN)
 
@@ -33,21 +42,38 @@ Create a `.env` file with your Cloudflare Tunnel token:
 echo "TUNNEL_TOKEN=your_cloudflare_tunnel_token_here" > .env
 ```
 
-### 3. Build and run the container
+### 3. Choose what container will be started
 
 ```bash
-docker compose up --build
+docker compose scale ollama=1 # To create an ollama container using the github already built image.
+# OR
+docker compose scale llama-server=1 # To create a llama-server container using the github already built image.
+```
+
+> LLama-server normally requires a bit more config, check `https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md` for what environment varibles you can use or model-presets/router mode.
+
+### 4. [OPTIONAL] Build the images locally
+
+```bash
+docker compose build
 ```
 
 ### 4. On CloudFlare
 
-Make sure the tunnel is configured to expose ollama through `http://localhost:11434`.
+Considering that you are using a token-based mode configuration, were the configuration stay in the cloudflare, make sure that:
+
+* The configuration points to `http://localhost:11434` to expose ollama;
+* The configuration points to ``http://localhost:8080` to expose llama-server.
 
 ## Configuration
 
 ### Environment Variables
 
+The following environment variable is required for cloudflare token based mode:
+
 - `TUNNEL_TOKEN` (required): Your Cloudflare Tunnel authentication token
+
+> Both OLLAMA and LLAMA-SERVER can be configured using environment variables, so change the environments accordingly in the docker-compose.yaml file.
 
 ### Ports
 
@@ -56,34 +82,20 @@ Make sure the tunnel is configured to expose ollama through `http://localhost:11
 
 ## Architecture
 
-The container runs two main services managed by supervisord:
+Each container run a LLM backend services managed by supervisord:
 
-1. **Ollama Service**: Serves LLM models on 0.0.0.0:11434
-2. **Cloudflare Tunnel**: Creates a secure tunnel to expose the LLM service externally
-
-Both services are configured with automatic restart policies and proper logging.
-
-## Building
-
-To build the Docker image manually:
-
-```bash
-docker compose build ollama
-```
+1. **LLM Backend**: Serves LLM models port 11434 (Ollama) or 8080 (llama-server);
+2. **Cloudflare Tunnel**: Creates a secure tunnel to expose the LLM service externally.
 
 ## Customization
 
 ### Modifying Ollama Version
 
-Edit the `ollama/Dockerfile` and change the base image tag:
+Edit the `deploy/Dockerfile` and change the base image tag:
 
 ```dockerfile
-FROM ollama/ollama:0.13.5 AS ollama
+FROM ollama/ollama:0.14.3 AS ollama
 ```
-
-### Future Backend Support
-
-Support for additional LLM backends (vLLM, llama.cpp) is planned for future releases. The project architecture is designed to accommodate multiple backend options.
 
 ### Modifying Cloudflare Tunnel Version
 

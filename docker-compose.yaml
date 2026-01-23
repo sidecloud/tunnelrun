@@ -1,24 +1,49 @@
+x-build_args: &build_args
+  OLLAMA_TAG: ${OLLAMA_TAG:-0.14.3}
+  LLAMA_SERVER_TAG: ${LLAMA_SERVER_TAG:-b7786}
+
 services:
   ollama:
     image: sidecloud/tunnelrun:ollama
-    scale: 1
+    scale: 0
     build:
-      context: ollama
+      context: deploy
       target: ollama
+      args:
+        <<: *build_args
       tags:
-        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-ollama}
-        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-latest}
+        - sidecloud8808/tunnelrun:ollama-${OLLAMA_TAG:-0.14.3}
+        - sidecloud8808/tunnelrun:ollama
+        - sidecloud8808/tunnelrun:latest
       cache_from:
         - type=gha,mode=max
       cache_to:
         - type=gha,mode=max
-      x-bake:
-        platforms:
-#          - linux/arm64
-          - linux/amd64
     environment:
       TUNNEL_TOKEN:
     volumes:
-      - ./ollama/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./deploy/ollama_supervisord.conf:/etc/supervisor/conf.d/ollama.conf
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+
+  llama-server:
+    image: sidecloud/tunnelrun:llama-server
+    scale: 0
+    build:
+      context: deploy
+      target: llama-server
+      args:
+        <<: *build_args
+      tags:
+        - sidecloud8808/tunnelrun:llama-server-cuda-${LLAMA_SERVER_TAG:-b7786}
+        - sidecloud8808/tunnelrun:llama-server
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+    volumes:
+      - ./deploy/llama_server_supervisord.conf:/etc/supervisor/conf.d/llama-server.conf
     sysctls:
       net.ipv4.ping_group_range: "65532 65532"
