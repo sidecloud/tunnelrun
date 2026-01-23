@@ -3,11 +3,11 @@ services:
     image: sidecloud/tunnelrun:ollama
     scale: 1
     build:
-      context: ollama
+      context: deploy
       target: ollama
       tags:
-        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-ollama}
-        - ${REPO:-sidecloud8808/tunnelrun}:${TAG:-latest}
+        - sidecloud8808/tunnelrun:ollama-${OLLAMA_TAG:-latest}
+        - sidecloud8808/tunnelrun:ollama
       cache_from:
         - type=gha,mode=max
       cache_to:
@@ -19,6 +19,29 @@ services:
     environment:
       TUNNEL_TOKEN:
     volumes:
-      - ./ollama/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./ollama/supervisord.conf:/etc/supervisor/conf.d/ollama.conf
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+
+  llama-server:
+    image: sidecloud/tunnelrun:llama-server
+    scale: 1
+    build:
+      context: deploy
+      target: llama-server
+      tags:
+        - sidecloud8808/tunnelrun:llama-server-${LLAMA_SERVER_TAG:-latest}
+        - sidecloud8808/tunnelrun:llama-server
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+      x-bake:
+        platforms:
+          - linux/amd64
+    environment:
+      TUNNEL_TOKEN:
+    volumes:
+      - ./llama/supervisord.conf:/etc/supervisor/conf.d/llama-server.conf
     sysctls:
       net.ipv4.ping_group_range: "65532 65532"
