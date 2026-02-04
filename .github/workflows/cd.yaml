@@ -34,6 +34,9 @@ jobs:
           - target: llama-server
             version: b7917
             var_name: LLAMA_SERVER_TAG
+          - target: llama-server
+            version: b7938
+            var_name: LLAMA_SERVER_TAG
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
