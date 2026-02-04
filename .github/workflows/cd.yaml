@@ -32,7 +32,7 @@ jobs:
             version: b7786
             var_name: LLAMA_SERVER_TAG
           - target: llama-server
-            version: b7925
+            version: b7917
             var_name: LLAMA_SERVER_TAG
     steps:
       - name: Checkout code
