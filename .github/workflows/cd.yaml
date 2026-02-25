@@ -23,20 +23,12 @@ jobs:
       matrix:
         include:
           - target: ollama
-            version: 0.14.3
-            var_name: OLLAMA_TAG
-          - target: ollama
-            version: 0.15.3
+            version: 0.17.0
             var_name: OLLAMA_TAG
           - target: llama-server
-            version: b7786
+            version: b8152
             var_name: LLAMA_SERVER_TAG
-          - target: llama-server
-            version: b7917
-            var_name: LLAMA_SERVER_TAG
-          - target: llama-server
-            version: b7938
-            var_name: LLAMA_SERVER_TAG
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
