@@ -23,10 +23,10 @@ jobs:
       matrix:
         include:
           - target: ollama
-            version: 0.17.5
+            version: 0.20.5
             var_name: OLLAMA_TAG
           - target: llama-server
-            version: b8184
+            version: b8740
             var_name: LLAMA_SERVER_TAG
 
     steps:
