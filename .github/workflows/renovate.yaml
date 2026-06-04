@@ -1,0 +1,61 @@
+name: Renovate
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: renovatebot/github-action@v46.1.14
+        with:
+          token: ${{ secrets.RENOVATE_TOKEN }}
+        env:
+          LOG_LEVEL: debug
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+
+      - name: Renovate summary
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+        run: |
+          {
+            echo "## Renovate summary"
+            echo ""
+            echo "- Repository: \`${GITHUB_REPOSITORY}\`"
+            echo "- Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo ""
+            echo "### Dependency Dashboard"
+            echo ""
+            dashboard_url="$(gh issue list \
+              --repo "$GITHUB_REPOSITORY" \
+              --state open \
+              --search "Dependency Dashboard in:title" \
+              --json number,title,url \
+              --jq '.[0].url // empty')"
+            if [ -n "$dashboard_url" ]; then
+              echo "- [Open dashboard](${dashboard_url})"
+            else
+              echo "- No open Dependency Dashboard issue found."
+            fi
+            echo ""
+            echo "### Open Renovate PRs"
+            echo ""
+            gh pr list \
+              --repo "$GITHUB_REPOSITORY" \
+              --state open \
+              --json number,title,url,headRefName \
+              --jq '
+                map(select(.headRefName | startswith("renovate/"))) as $prs |
+                if ($prs | length) == 0 then
+                  "_No open Renovate PRs._"
+                else
+                  ["| PR | Branch | Title |", "|---|---|---|"] +
+                  ($prs | map("| [#\(.number)](\(.url)) | `\(.headRefName)` | \(.title) |"))
+                  | .[]
+                end
+              '
+          } >> "$GITHUB_STEP_SUMMARY"
