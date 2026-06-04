@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["renovate", "dependencies"],
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "customManagers": [
+    {
+      "description": "Track ollama releases on Docker Hub",
+      "customType": "regex",
+      "fileMatch": ["^versions/ollama$"],
+      "matchStrings": ["(?<currentValue>[\\d.]+)"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ollama/ollama"
+    },
+    {
+      "description": "Track llama.cpp server-cuda releases on GHCR",
+      "customType": "regex",
+      "fileMatch": ["^versions/llama-server$"],
+      "matchStrings": ["(?<currentValue>b\\d+)"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/ggml-org/llama.cpp",
+      "extractVersionTemplate": "^server-cuda-(?<version>.+)$",
+      "versioningTemplate": "regex:^b(?<major>\\d+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Exclude RC and pre-release tags from ollama",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ollama/ollama"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    }
+  ]
+}
