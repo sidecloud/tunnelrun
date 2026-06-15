@@ -1,7 +1,12 @@
 x-build_args: &build_args
   OLLAMA_TAG: ${OLLAMA_TAG:-0.14.3}
   LLAMA_SERVER_TAG: ${LLAMA_SERVER_TAG:-b7786}
+  VLLM_TAG: ${VLLM_TAG:-v0.23.0}
   CLOUDFLARED_TAG: ${CLOUDFLARED_TAG:-2026.1.1}
+
+volumes:
+  cache:
+  triton:
 
 services:
   ollama:
@@ -24,6 +29,7 @@ services:
       TUNNEL_TOKEN:
     volumes:
       - ./deploy/ollama_supervisord.conf:/etc/supervisor/conf.d/ollama.conf
+      - cache:/home/ollama/.ollama
     sysctls:
       net.ipv4.ping_group_range: "65532 65532"
 
@@ -46,5 +52,62 @@ services:
       TUNNEL_TOKEN:
     volumes:
       - ./deploy/llama_server_supervisord.conf:/etc/supervisor/conf.d/llama-server.conf
+      - cache:/root/.cache
+      - triton:/root/.triton
     sysctls:
       net.ipv4.ping_group_range: "65532 65532"
+
+  vllm:
+    image: sidecloud/tunnelrun:vllm
+    scale: 0
+    build:
+      context: deploy
+      target: vllm
+      args:
+        <<: *build_args
+      tags:
+        - sidecloud8808/tunnelrun:vllm-${VLLM_TAG:-v0.15.1}
+        - sidecloud8808/tunnelrun:vllm
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+      VLLM_LOGGING_LEVEL: DEBUG
+    volumes:
+      - ./deploy/vllm_supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./deploy/vllm.config.yaml:/etc/vllm/config.yaml
+      - cache:/root/.cache
+      - triton:/root/.triton
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+
+  vllm-rocm:
+    image: sidecloud/tunnelrun:vllm-rocm
+    scale: 0
+    build:
+      context: deploy
+      target: vllm-rocm
+      args:
+        <<: *build_args
+      tags:
+        - sidecloud8808/tunnelrun:vllm-rocm
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+      VLLM_LOGGING_LEVEL: DEBUG
+    volumes:
+      - ./deploy/vllm_supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./deploy/vllm.config.yaml:/etc/vllm/config.yaml
+      - cache:/root/.cache
+      - triton:/root/.triton
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
