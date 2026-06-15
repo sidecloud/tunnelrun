@@ -1,0 +1,21 @@
+model: cyankiwi/Qwen3.5-9B-AWQ-4bit
+served_model_name:
+  - qwen35-9b
+host: 127.0.0.1
+port: 8080
+language_model_only: true
+reasoning_parser: qwen3
+enable_prefix_caching: false
+max_model_len: 262144
+speculative_config:
+  method: mtp
+  num_speculative_tokens: 1
+  attention_backend: TRITON_ATTN
+compilation_config:
+  cudagraph_mode: FULL_AND_PIECEWISE
+attention_backend: TRITON_ATTN
+max_num_batched_tokens: 16384
+enforce_eager: true
+enable_auto_tool_choice: true
+tool_call_parser: qwen3_coder
+
