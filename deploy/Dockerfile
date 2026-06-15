@@ -33,9 +33,7 @@ CMD ["-c", "/etc/supervisor/supervisord.conf"]
 # vLLM target
 FROM vllm/vllm-openai:${VLLM_TAG} AS vllm
 ENV UV_TOOL_BIN_DIR=/usr/local/bin
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
-RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
 COPY vllm_supervisord.conf /etc/supervisor/supervisord.conf
 VOLUME /root/.cache
 ENTRYPOINT ["/usr/local/bin/supervisord"]
@@ -43,8 +41,6 @@ CMD ["-c", "/etc/supervisor/supervisord.conf"]
 
 # vLLM ROCm target (local AMD GPU testing)
 FROM vllm/vllm-openai-rocm:${VLLM_TAG} AS vllm-rocm
-ENV UV_TOOL_BIN_DIR=/usr/local/bin
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
 COPY vllm_supervisord.conf /etc/supervisor/supervisord.conf
 VOLUME /root/.cache
