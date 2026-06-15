@@ -28,9 +28,11 @@ jobs:
           matrix=$(jq -cn \
             --arg ollama "$(cat versions/ollama)" \
             --arg llama "$(cat versions/llama-server)" \
+            --arg vllm "$(cat versions/vllm)" \
             '[
               {"target":"ollama","version":$ollama,"var_name":"OLLAMA_TAG"},
-              {"target":"llama-server","version":$llama,"var_name":"LLAMA_SERVER_TAG"}
+              {"target":"llama-server","version":$llama,"var_name":"LLAMA_SERVER_TAG"},
+              {"target":"vllm","version":$vllm,"var_name":"VLLM_TAG"}
             ]')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 

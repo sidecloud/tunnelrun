@@ -2,6 +2,7 @@
 
 ARG OLLAMA_TAG
 ARG LLAMA_SERVER_TAG
+ARG VLLM_TAG
 ARG CLOUDFLARED_TAG
 
 FROM cloudflare/cloudflared:${CLOUDFLARED_TAG} as cloudflared
@@ -25,6 +26,27 @@ COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
 RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
 RUN uv tool install supervisor
 COPY llama_server_supervisord.conf /etc/supervisor/supervisord.conf
-VOLUME /root/.cache/llama.cpp
+VOLUME /root/.cache
+ENTRYPOINT ["/usr/local/bin/supervisord"]
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
+
+# vLLM target
+FROM vllm/vllm-openai:${VLLM_TAG} AS vllm
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
+RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
+COPY vllm_supervisord.conf /etc/supervisor/supervisord.conf
+VOLUME /root/.cache
+ENTRYPOINT ["/usr/local/bin/supervisord"]
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
+
+# vLLM ROCm target (local AMD GPU testing)
+FROM vllm/vllm-openai-rocm:${VLLM_TAG} AS vllm-rocm
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
+COPY vllm_supervisord.conf /etc/supervisor/supervisord.conf
+VOLUME /root/.cache
 ENTRYPOINT ["/usr/local/bin/supervisord"]
 CMD ["-c", "/etc/supervisor/supervisord.conf"]
