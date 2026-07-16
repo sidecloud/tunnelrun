@@ -5,14 +5,16 @@ This solutions allows you to run a container that automatically binds to a Cloud
 The current LLM solutions supported are:
 
 * Ollama;
-* LLama-Server;
+* LLama-Server (CUDA);
+* LLama-Server (Vulkan);
+* LLama-Server (ROCm);
 * vLLM (CUDA);
 * vLLM (ROCm — local AMD GPU testing).
 
 ## Features
 
 - **Ollama Integration**: Runs Ollama for serving large language models
-- **Llama-server Support**: Integrated support for llama-server as an LLM backend
+- **Llama-server Support**: Integrated CUDA, Vulkan, and ROCm support for llama-server as an LLM backend
 - **vLLM Support**: Integrated support for vLLM as an OpenAI-compatible backend (CUDA and ROCm)
 - **Cloudflare Tunnel**: Securely exposes LLM services to the internet without opening ports
 - **Supervisor Management**: Uses supervisord to manage LLM and Cloudflare Tunnel processes
@@ -52,12 +54,20 @@ docker compose scale ollama=1       # Ollama
 # OR
 docker compose scale llama-server=1 # llama-server
 # OR
+docker compose scale llama-server-vulkan=1 # llama-server (Vulkan)
+# OR
+docker compose scale llama-server-rocm=1   # llama-server (ROCm)
+# OR
 docker compose scale vllm=1         # vLLM (CUDA)
 # OR
 docker compose scale vllm-rocm=1    # vLLM (ROCm — AMD GPU)
 ```
 
 > LLama-server normally requires a bit more config, check `https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md` for what environment varibles you can use or model-presets/router mode.
+
+> The Vulkan service passes `/dev/dri` through to the container and requires a host with a working Vulkan driver.
+
+> The ROCm service passes `/dev/kfd` and `/dev/dri` through to the container and requires a ROCm-compatible AMD GPU and host driver.
 
 > vLLM requires a configuration file — see the [vLLM Configuration](#vllm-configuration) section below.
 
