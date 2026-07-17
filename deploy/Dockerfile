@@ -30,6 +30,30 @@ VOLUME /root/.cache
 ENTRYPOINT ["/usr/local/bin/supervisord"]
 CMD ["-c", "/etc/supervisor/supervisord.conf"]
 
+# llama.cpp Vulkan target
+FROM ghcr.io/ggml-org/llama.cpp:server-vulkan-${LLAMA_SERVER_TAG} AS llama-server-vulkan
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
+RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
+RUN uv tool install supervisor
+COPY llama_server_supervisord.conf /etc/supervisor/supervisord.conf
+VOLUME /root/.cache
+ENTRYPOINT ["/usr/local/bin/supervisord"]
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
+
+# llama.cpp ROCm target
+FROM ghcr.io/ggml-org/llama.cpp:server-rocm-${LLAMA_SERVER_TAG} AS llama-server-rocm
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
+RUN uv python install 3.12 --default && ln -s /root/.local/bin/python /usr/local/bin/python
+RUN uv tool install supervisor
+COPY llama_server_supervisord.conf /etc/supervisor/supervisord.conf
+VOLUME /root/.cache
+ENTRYPOINT ["/usr/local/bin/supervisord"]
+CMD ["-c", "/etc/supervisor/supervisord.conf"]
+
 # vLLM target
 FROM vllm/vllm-openai:${VLLM_TAG} AS vllm
 ENV UV_TOOL_BIN_DIR=/usr/local/bin

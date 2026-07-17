@@ -57,6 +57,57 @@ services:
     sysctls:
       net.ipv4.ping_group_range: "65532 65532"
 
+  llama-server-vulkan:
+    image: sidecloud/tunnelrun:llama-server-vulkan
+    scale: 0
+    build:
+      context: deploy
+      target: llama-server-vulkan
+      args:
+        <<: *build_args
+      tags:
+        - sidecloud8808/tunnelrun:llama-server-vulkan-${LLAMA_SERVER_TAG:-b7786}
+        - sidecloud8808/tunnelrun:llama-server-vulkan
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+    volumes:
+      - ./deploy/llama_server_supervisord.conf:/etc/supervisor/conf.d/llama-server.conf
+      - cache:/root/.cache
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+    devices:
+      - /dev/dri:/dev/dri
+
+  llama-server-rocm:
+    image: sidecloud/tunnelrun:llama-server-rocm
+    scale: 0
+    build:
+      context: deploy
+      target: llama-server-rocm
+      args:
+        <<: *build_args
+      tags:
+        - sidecloud8808/tunnelrun:llama-server-rocm-${LLAMA_SERVER_TAG:-b7786}
+        - sidecloud8808/tunnelrun:llama-server-rocm
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+    volumes:
+      - ./deploy/llama_server_supervisord.conf:/etc/supervisor/conf.d/llama-server.conf
+      - cache:/root/.cache
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+
   vllm:
     image: sidecloud/tunnelrun:vllm
     scale: 0
