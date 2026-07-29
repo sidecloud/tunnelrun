@@ -23,6 +23,14 @@
       "depNameTemplate": "ghcr.io/ggml-org/llama.cpp",
       "extractVersionTemplate": "^server-cuda-(?<version>.+)$",
       "versioningTemplate": "regex:^b(?<major>\\d+)$"
+    },
+    {
+      "description": "Track vLLM releases on Docker Hub",
+      "customType": "regex",
+      "fileMatch": ["^versions/vllm$"],
+      "matchStrings": ["(?<currentValue>v[\\d.]+)"],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "vllm/vllm-openai"
     }
   ],
   "packageRules": [
@@ -31,6 +39,12 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ollama/ollama"],
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "Exclude RC and pre-release tags from vLLM",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["vllm/vllm-openai"],
+      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
     }
   ]
 }
