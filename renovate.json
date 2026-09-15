@@ -18,11 +18,11 @@
       "description": "Track llama.cpp server-cuda releases on GHCR",
       "customType": "regex",
       "fileMatch": ["^versions/llama-server$"],
-      "matchStrings": ["(?<currentValue>b\\d+)"],
+      "matchStrings": ["(?<currentValue>v[\\d.]+)"],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/ggml-org/llama.cpp",
       "extractVersionTemplate": "^server-cuda-(?<version>.+)$",
-      "versioningTemplate": "regex:^b(?<major>\\d+)$"
+      "versioningTemplate": "semver"
     },
     {
       "description": "Track vLLM releases on Docker Hub",
@@ -44,6 +44,12 @@
       "description": "Exclude RC and pre-release tags from vLLM",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["vllm/vllm-openai"],
+      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "Exclude legacy build-number tags from llama.cpp",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/ggml-org/llama.cpp"],
       "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
     }
   ]
