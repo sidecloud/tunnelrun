@@ -114,6 +114,9 @@ services:
     build:
       context: deploy
       target: vllm
+      platforms:
+        - linux/amd64
+        - linux/arm64
       args:
         <<: *build_args
       tags:
