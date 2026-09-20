@@ -10,6 +10,8 @@ The current LLM solutions supported are:
 * LLama-Server (ROCm);
 * vLLM (CUDA);
 * vLLM (ROCm — local AMD GPU testing).
+* vLLM Diffusion (CUDA — pinned vLLM source build);
+* vLLM Diffusion (ROCm — pinned vLLM source build).
 
 ## Features
 
@@ -61,6 +63,10 @@ docker compose scale llama-server-rocm=1   # llama-server (ROCm)
 docker compose scale vllm=1         # vLLM (CUDA)
 # OR
 docker compose scale vllm-rocm=1    # vLLM (ROCm — AMD GPU)
+# OR
+docker compose scale vllm-diffusion=1      # vLLM Diffusion (CUDA)
+# OR
+docker compose scale vllm-rocm-diffusion=1 # vLLM Diffusion (ROCm)
 ```
 
 > LLama-server normally requires a bit more config, check `https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md` for what environment varibles you can use or model-presets/router mode.
@@ -115,6 +121,32 @@ tool_call_parser: qwen3_coder
 Full list of supported options: `vllm serve --help=all` or https://docs.vllm.ai/en/latest/configuration/serve_args.html
 
 To use a different model, edit `deploy/vllm.config.yaml` before starting the container. No environment variables are required for the model — everything is driven by the config file.
+
+### Pinned vLLM Diffusion Builds
+
+`vllm-diffusion` and `vllm-rocm-diffusion` are built from the vLLM source
+commit in `versions/diffusion_version.txt`, rather than from a released
+`vllm-openai` image. Update that file manually to change the source revision.
+
+For a local build, export the same values used by CI:
+
+```bash
+export VLLM_DIFFUSION_COMMIT="$(cat versions/diffusion_version.txt)"
+export VLLM_DIFFUSION_COMMIT_SHORT="${VLLM_DIFFUSION_COMMIT:0:7}"
+docker compose build vllm-diffusion vllm-rocm-diffusion
+```
+
+Published images have a moving alias and a commit-specific tag, for example
+`sidecloud8808/tunnelrun:vllm-diffusion` and
+`sidecloud8808/tunnelrun:vllm-diffusion-ceb8eeb`.
+
+The source-built images are published only by manually running the
+`Docker Diffusion Images` GitHub Actions workflow. It can build both variants
+or only CUDA/ROCm.
+
+> These source builds are substantially heavier than the standard vLLM wrapper
+> images. They require network access to the pinned vLLM repository and may
+> exceed normal GitHub-hosted runner disk or time limits.
 
 ### Ports
 
