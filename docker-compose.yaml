@@ -4,6 +4,12 @@ x-build_args: &build_args
   VLLM_TAG: ${VLLM_TAG:-v0.23.0}
   CLOUDFLARED_TAG: ${CLOUDFLARED_TAG:-2026.1.1}
 
+x-diffusion_build_args: &diffusion_build_args
+  CLOUDFLARED_TAG: ${CLOUDFLARED_TAG:-2026.1.1}
+  VLLM_DIFFUSION_REPO: ${VLLM_DIFFUSION_REPO:-https://github.com/mmastrac/vllm.git}
+  VLLM_DIFFUSION_REF: ${VLLM_DIFFUSION_REF:-structured-reads-main}
+  VLLM_DIFFUSION_COMMIT: ${VLLM_DIFFUSION_COMMIT:-ceb8eebf3eedddb964a50180f33838a9a6b13ee2}
+
 volumes:
   cache:
   triton:
@@ -147,6 +153,66 @@ services:
         <<: *build_args
       tags:
         - sidecloud8808/tunnelrun:vllm-rocm
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+      VLLM_LOGGING_LEVEL: DEBUG
+    volumes:
+      - ./deploy/vllm_supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./deploy/vllm.config.yaml:/etc/vllm/config.yaml
+      - cache:/root/.cache
+      - triton:/root/.triton
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+  vllm-diffusion:
+    image: sidecloud/tunnelrun:vllm-diffusion
+    scale: 0
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.vllm-diffusion
+      target: vllm-diffusion
+      args:
+        <<: *diffusion_build_args
+      tags:
+        - sidecloud8808/tunnelrun:vllm-diffusion-${VLLM_DIFFUSION_COMMIT_SHORT:-ceb8eeb}
+        - sidecloud8808/tunnelrun:vllm-diffusion
+      cache_from:
+        - type=gha,mode=max
+      cache_to:
+        - type=gha,mode=max
+    environment:
+      TUNNEL_TOKEN:
+      VLLM_LOGGING_LEVEL: DEBUG
+    volumes:
+      - ./deploy/vllm_supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./deploy/vllm.config.yaml:/etc/vllm/config.yaml
+      - cache:/root/.cache
+      - triton:/root/.triton
+    sysctls:
+      net.ipv4.ping_group_range: "65532 65532"
+
+  vllm-rocm-diffusion:
+    image: sidecloud/tunnelrun:vllm-rocm-diffusion
+    scale: 0
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.vllm-rocm-diffusion
+      target: vllm-rocm-diffusion
+      args:
+        <<: *diffusion_build_args
+        REMOTE_VLLM: "1"
+        VLLM_REPO: ${VLLM_DIFFUSION_REPO:-https://github.com/mmastrac/vllm.git}
+        VLLM_BRANCH: ${VLLM_DIFFUSION_COMMIT:-ceb8eebf3eedddb964a50180f33838a9a6b13ee2}
+      tags:
+        - sidecloud8808/tunnelrun:vllm-rocm-diffusion-${VLLM_DIFFUSION_COMMIT_SHORT:-ceb8eeb}
+        - sidecloud8808/tunnelrun:vllm-rocm-diffusion
       cache_from:
         - type=gha,mode=max
       cache_to:
