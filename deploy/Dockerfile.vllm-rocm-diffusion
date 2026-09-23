@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.27
 
 # Derived from vLLM docker/Dockerfile.rocm at the commit in
 # versions/diffusion_version.txt. Tunnelrun-specific changes are the pinned
